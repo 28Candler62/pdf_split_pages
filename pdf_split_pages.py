@@ -1,7 +1,7 @@
 from pypdf import PdfReader, PdfWriter
 
-input_path = "path/to/inputfolder"
-output_path = "path/to/outputfolder"
+input_path = "infolder"
+output_path = "outfolder"
 
 output_settings = {
     "input_file_1.pdf": [
@@ -25,17 +25,24 @@ def pdf_split_pages(in_path:str, out_path:str, settings:dict[tuple]):
     
     for infile, out_settings in settings.items():
         o = 0
-        pdf_path = f'{in_path}\{infile}'
+        out_page_count = 1
+        pdf_path = f'{in_path}/{infile}'
         with open(pdf_path, "rb") as pdf_file:
-            pdf_reader = PdfReader
+            pdf_reader = PdfReader(pdf_file)
+            pdf_writer = PdfWriter()
 
             for page_num in range(len(pdf_reader.pages)):
                 cutoff, outfilename = out_settings[o]
-                output_filename = f'{out_path}\{outfilename}'
-                page_count = page_num + 1
-                pdf_writer = PdfWriter()
-                pdf_writer.add_page(pdf_reader.pages[page_num])
-                with open(output_filename, "wb") as output_file:
-                    pdf_writer.write(output_file)
-                if (page_count == cutoff):
+                output_filename = f'{out_path}/{outfilename}'                
+                pdf_writer.add_page(pdf_reader.pages[page_num])   
+                with open(output_filename, "ab") as output_file:
+                        pdf_writer.write(output_file)             
+                if (out_page_count == cutoff):
+                    pdf_writer = PdfWriter()                   
                     o += 1
+                    out_page_count = 1
+                else:
+                    out_page_count += 1
+
+if __name__ == "__main__":
+    pdf_split_pages(input_path, output_path, output_settings)
